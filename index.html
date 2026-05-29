@@ -4,100 +4,160 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>mermaid-slide-deck — explain logic as a deck, not a wall of text</title>
-<meta name="description" content="Turn any logic, code path, or architecture into a horizontal, flip-through slide deck. Mermaid diagrams, dark theme, no vertical scroll. A Claude Code skill plus a single-file HTML template.">
+<meta name="description" content="Turn any logic, code path, or architecture into a horizontal, flip-through slide deck. Mermaid diagrams, no vertical scroll. A Claude Code skill plus a single-file HTML template.">
 <meta property="og:title" content="mermaid-slide-deck">
-<meta property="og:description" content="Explain logic as a flip-through slide deck — Mermaid diagrams, dark theme, zero build.">
+<meta property="og:description" content="Explain logic as a flip-through slide deck — Mermaid diagrams, zero build.">
 <meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,560;1,9..144,500&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0d1526; --bg2:#0a1120; --card:#172033; --card2:#1f2b42; --line:#2a3a55; --ink:#e8eef7; --muted:#aebccf;
-    --blue:#60a5fa; --green:#34d399; --amber:#fbbf24; --violet:#a78bfa; --focus:#7cc0ff;
-    --maxw:1080px;
-    --t-h1:clamp(34px,5.4vw,60px); --t-h2:clamp(24px,3vw,38px); --t-lead:clamp(17px,1.9vw,22px); --t-body:clamp(15px,1.4vw,17px);
+    --paper:#f4efe4; --paper2:#ece5d6; --ink:#191712; --ink-soft:#5d564a; --rule:#d7cebb;
+    --accent:#c8371c; --accent-soft:#e2553a; --accent-wash:#f6e3da;
+    --code-bg:#17150f; --code-ink:#ebe4d3;
+    --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+    --serif:"Fraunces",Georgia,"Times New Roman",serif;
+    --sans:ui-sans-serif,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+    --maxw:1140px;
+    --t-h1:clamp(44px,7.6vw,104px); --t-h2:clamp(28px,3.4vw,42px); --t-lead:clamp(17px,1.7vw,21px);
+    --ease:cubic-bezier(.2,.7,.2,1);
   }
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
-  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);
-    font-size:var(--t-body);line-height:1.65;-webkit-font-smoothing:antialiased}
-  a{color:var(--blue);text-decoration:none} a:hover{text-decoration:underline}
-  :focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:8px}
-  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
-  .skip{position:absolute;left:-9999px;top:0;background:var(--blue);color:#06122a;padding:10px 16px;border-radius:0 0 10px 0;font-weight:700;z-index:80}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.6;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  /* signature: drafting graph-paper grid */
+  body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background-image:linear-gradient(var(--rule) 1px,transparent 1px),linear-gradient(90deg,var(--rule) 1px,transparent 1px);
+    background-size:30px 30px;opacity:.34;
+    -webkit-mask-image:radial-gradient(120% 90% at 50% 0%,#000 55%,transparent 100%);
+            mask-image:radial-gradient(120% 90% at 50% 0%,#000 55%,transparent 100%)}
+  ::selection{background:var(--accent);color:#fff}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1.5px}
+  :focus-visible{outline:2.5px solid var(--accent);outline-offset:3px}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 26px}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--ink);color:var(--paper);padding:10px 16px;font-weight:600;z-index:90}
   .skip:focus{left:0}
+  .mono{font-family:var(--mono)}
+  .label{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft)}
 
   /* nav */
-  header.nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(10px);background:rgba(13,21,38,.78);border-bottom:1px solid var(--line)}
-  .nav .row{display:flex;align-items:center;justify-content:space-between;height:62px}
-  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-family:ui-monospace,Menlo,monospace;font-size:16px;color:var(--ink)}
-  .brand .sq{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--violet));display:inline-block}
-  .nav nav{display:flex;gap:22px;align-items:center}
-  .nav nav a{color:var(--muted);font-size:15px} .nav nav a:hover{color:var(--ink);text-decoration:none}
-  .btn{display:inline-flex;align-items:center;gap:8px;border-radius:10px;padding:10px 18px;font-weight:700;font-size:15px;border:1px solid var(--line);cursor:pointer}
-  .btn-primary{background:linear-gradient(135deg,var(--blue),#3b82f6);color:#06122a;border-color:transparent}
-  .btn-primary:hover{text-decoration:none;filter:brightness(1.07)}
-  .btn-ghost{background:var(--card);color:var(--ink)} .btn-ghost:hover{text-decoration:none;border-color:var(--blue)}
+  header.nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 86%,transparent);
+    backdrop-filter:blur(7px);border-bottom:1px solid var(--ink)}
+  .nav .row{display:flex;align-items:center;justify-content:space-between;height:60px}
+  .brand{font-family:var(--mono);font-weight:600;font-size:15px;letter-spacing:-.01em;display:flex;align-items:center;gap:10px;color:var(--ink)}
+  .brand .mk{width:22px;height:22px;border:1.5px solid var(--ink);position:relative;display:inline-block}
+  .brand .mk::after{content:"";position:absolute;inset:4px;border-left:1.5px solid var(--accent);border-bottom:1.5px solid var(--accent)}
+  .nav nav{display:flex;gap:26px;align-items:center}
+  .nav nav a{font-family:var(--mono);font-size:13px;letter-spacing:.04em;color:var(--ink)}
+  .nav nav a:hover{color:var(--accent);text-decoration:none}
+
+  /* buttons */
+  .btn{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:14px;font-weight:600;letter-spacing:.02em;
+    padding:13px 20px;border:1.5px solid var(--ink);background:transparent;color:var(--ink);cursor:pointer;transition:transform .12s var(--ease),background .12s,color .12s}
+  .btn:hover{text-decoration:none;transform:translate(-2px,-2px);box-shadow:4px 4px 0 var(--ink)}
+  .btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn-primary:hover{box-shadow:4px 4px 0 var(--ink)}
+  .btn .arr{transition:transform .15s var(--ease)} .btn:hover .arr{transform:translateX(3px)}
 
   /* hero */
-  .hero{padding:64px 0 28px;background:radial-gradient(1100px 480px at 78% -8%,rgba(96,165,250,.16),transparent 60%),radial-gradient(800px 420px at 5% 12%,rgba(167,139,250,.12),transparent 55%)}
-  .hero-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:42px;align-items:center}
-  .eyebrow{display:inline-block;background:#142a4d;color:#9cc6ff;border:1px solid #2c4c80;border-radius:999px;padding:5px 14px;font-size:13px;font-weight:700;letter-spacing:.04em;margin-bottom:18px}
-  h1{font-size:var(--t-h1);line-height:1.08;letter-spacing:-1px;margin:0 0 16px;font-weight:850}
-  h1 .grad{background:linear-gradient(120deg,var(--blue),var(--violet));-webkit-background-clip:text;background-clip:text;color:transparent}
-  .hero p.lead{font-size:var(--t-lead);color:var(--muted);margin:0 0 26px;max-width:46ch}
-  .cta{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
-  .chips{display:flex;gap:8px;flex-wrap:wrap}
-  .chip{font-size:13px;color:var(--muted);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 12px}
-  .chip b{color:var(--ink);font-weight:700}
+  .hero{padding:70px 0 30px}
+  .hero-grid{display:grid;grid-template-columns:1.06fr .94fr;gap:54px;align-items:center}
+  .hero .eyebrow{margin-bottom:22px;display:flex;align-items:center;gap:12px}
+  .hero .eyebrow::after{content:"";flex:1;height:1px;background:var(--rule)}
+  h1{font-family:var(--serif);font-weight:560;font-size:var(--t-h1);line-height:.96;letter-spacing:-.02em;margin:0 0 22px;font-optical-sizing:auto}
+  h1 em{font-style:italic;color:var(--accent);font-weight:500}
+  .hero .lead{font-size:var(--t-lead);color:var(--ink-soft);max-width:50ch;margin:0 0 30px}
+  .cta{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:26px}
+  .specrow{display:flex;gap:0;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink)}
+  .specrow div{flex:1;padding:11px 4px;text-align:center;font-family:var(--mono);font-size:12.5px;color:var(--ink-soft);border-right:1px solid var(--rule)}
+  .specrow div:last-child{border-right:0} .specrow b{display:block;font-size:20px;color:var(--ink);font-weight:600;line-height:1.2}
 
-  /* browser frame with live demo */
-  .browser{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 24px 60px -28px rgba(0,0,0,.7)}
-  .browser .bar{display:flex;align-items:center;gap:8px;padding:11px 14px;border-bottom:1px solid var(--line);background:var(--card2)}
-  .browser .dot{width:11px;height:11px;border-radius:50%;background:#3a4a66} .browser .dot:nth-child(1){background:#f87171}.browser .dot:nth-child(2){background:#fbbf24}.browser .dot:nth-child(3){background:#34d399}
-  .browser .addr{margin-left:10px;font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--muted);background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:4px 10px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .browser iframe{width:100%;height:430px;border:0;display:block;background:var(--bg)}
-  .preview-note{font-size:13px;color:var(--muted);margin-top:10px;text-align:center}
+  /* figure frame (drafting plate) */
+  .figure{position:relative;border:1.5px solid var(--ink);background:var(--code-bg)}
+  .figure .cap{position:absolute;top:-11px;left:16px;background:var(--paper);padding:0 8px;font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink)}
+  .figure .cap b{color:var(--accent)}
+  .figure::before,.figure::after{content:"";position:absolute;width:9px;height:9px;border:1.5px solid var(--accent)}
+  .figure::before{right:-1px;top:-1px;border-left:0;border-bottom:0}
+  .figure::after{left:-1px;bottom:-1px;border-right:0;border-top:0}
+  .figure iframe{width:100%;height:460px;border:0;display:block;background:var(--code-bg)}
+  .figcap{font-family:var(--mono);font-size:12.5px;color:var(--ink-soft);margin-top:14px}
+  .figcap a{font-weight:600}
 
-  /* sections */
-  section{padding:64px 0;border-top:1px solid var(--line)}
-  h2{font-size:var(--t-h2);letter-spacing:-.4px;margin:0 0 8px;font-weight:820}
-  .sectsub{color:var(--muted);margin:0 0 30px;max-width:64ch}
-  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-  .feat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px}
-  .feat .ic{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;font-weight:800;font-size:18px;margin-bottom:14px;color:#06122a}
-  .feat h3{margin:0 0 6px;font-size:18px} .feat p{margin:0;color:var(--muted);font-size:15px}
-  .i-blue{background:var(--blue)} .i-green{background:var(--green)} .i-violet{background:var(--violet)} .i-amber{background:var(--amber)}
+  /* section heading */
+  section{padding:76px 0;border-top:1px solid var(--ink)}
+  .seclabel{display:flex;align-items:baseline;gap:16px;margin-bottom:34px}
+  .seclabel .no{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.1em}
+  .seclabel h2{font-family:var(--serif);font-weight:560;font-size:var(--t-h2);letter-spacing:-.01em;margin:0;line-height:1}
+  .seclabel .rule{flex:1;height:1px;background:var(--rule);align-self:center}
 
-  /* how it works */
-  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;counter-reset:s}
-  .step{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;position:relative}
-  .step::before{counter-increment:s;content:counter(s);position:absolute;top:-14px;left:22px;width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--violet));color:#06122a;font-weight:800;display:grid;place-items:center;font-size:15px}
-  .step h3{margin:8px 0 6px;font-size:17px} .step p{margin:0;color:var(--muted);font-size:15px}
-  .step code{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:13px;color:#cbd5e1}
+  /* why — editorial columns */
+  .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+  .col{padding:4px 26px;border-left:1px solid var(--rule)}
+  .col:first-child{padding-left:0;border-left:0}
+  .col .idx{font-family:var(--serif);font-size:40px;font-style:italic;color:var(--accent);line-height:1;margin-bottom:14px}
+  .col h3{font-size:19px;margin:0 0 8px;letter-spacing:-.01em}
+  .col p{margin:0;color:var(--ink-soft);font-size:15.5px}
 
-  /* files table */
-  table{width:100%;border-collapse:collapse;border:1px solid var(--line);border-radius:14px;overflow:hidden;font-size:15px}
-  th,td{text-align:left;padding:13px 16px;border-bottom:1px solid var(--line)}
-  thead th{background:var(--card2);font-weight:700} tbody td{background:var(--card)} tbody tr:last-child td{border-bottom:none}
-  td code,.mono{font-family:ui-monospace,Menlo,monospace;font-size:13.5px;color:#9cc6ff}
+  /* filmstrip — signature horizontal motif */
+  .strip-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px}
+  .strip-head .hint{font-family:var(--mono);font-size:12px;color:var(--ink-soft)}
+  .strip{display:flex;gap:14px;overflow-x:auto;padding:8px 0 18px;scroll-snap-type:x proximity;scrollbar-width:thin}
+  .plate{scroll-snap-align:start;flex:0 0 210px;border:1.5px solid var(--ink);background:var(--paper);aspect-ratio:16/10;padding:14px;display:flex;flex-direction:column;justify-content:space-between;transition:transform .14s var(--ease),box-shadow .14s}
+  .plate:hover{transform:translateY(-3px);box-shadow:5px 5px 0 var(--ink)}
+  .plate .pn{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--accent)}
+  .plate .pt{font-family:var(--serif);font-size:21px;line-height:1.05;letter-spacing:-.01em}
+  .plate .gl{height:30px;display:flex;align-items:center;gap:5px}
+  .plate .gl span{height:7px;background:var(--rule)} .plate .gl .a{width:34%}.plate .gl .b{width:22%;background:var(--accent-soft)}.plate .gl .c{width:14%}
+
+  /* how — procedure */
+  .proc{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;counter-reset:p}
+  .proc .s{position:relative;padding-top:24px;border-top:2px solid var(--ink)}
+  .proc .s::before{counter-increment:p;content:"0" counter(p);position:absolute;top:-16px;right:0;font-family:var(--mono);font-size:13px;color:var(--accent);background:var(--paper);padding-left:8px}
+  .proc h3{font-family:var(--serif);font-weight:560;font-size:22px;margin:0 0 8px}
+  .proc p{margin:0;color:var(--ink-soft);font-size:15.5px}
+  .proc code{font-family:var(--mono);font-size:13px;background:var(--accent-wash);padding:1px 6px;border:1px solid var(--rule)}
+
+  /* inside — parts list */
+  table{width:100%;border-collapse:collapse;border:1.5px solid var(--ink)}
+  caption{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);text-align:left;padding-bottom:12px}
+  th,td{text-align:left;padding:14px 16px;border-bottom:1px solid var(--rule);vertical-align:top}
+  thead th{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);background:var(--paper2)}
+  tbody tr:last-child td{border-bottom:0}
+  td .fn{font-family:var(--mono);font-size:13.5px;color:var(--accent);font-weight:600}
+  td.desc{color:var(--ink-soft);font-size:15.5px}
 
   /* install */
-  .tabs{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-  .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}
-  .panel h3{margin:0 0 12px;font-size:17px;display:flex;align-items:center;gap:9px}
-  .panel h3 .tag{font-size:12px;font-weight:700;color:#06122a;background:var(--green);border-radius:6px;padding:2px 8px}
-  pre{margin:0;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:14px;overflow:auto}
-  code,pre{font-family:ui-monospace,Menlo,"SF Mono",monospace}
-  pre code{font-size:13.5px;color:#dbe5f3;background:none;border:0;padding:0;white-space:pre}
-  .muted{color:var(--muted)}
+  .tabs{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+  .card{border:1.5px solid var(--ink);background:var(--paper)}
+  .card .ch{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1.5px solid var(--ink)}
+  .card .ch .tg{font-family:var(--mono);font-size:12px;font-weight:600;color:#fff;background:var(--ink);padding:2px 9px}
+  .card .ch .tg.b{background:var(--accent)}
+  .card .ch h3{font-size:16px;margin:0;font-weight:600}
+  pre{margin:0;background:var(--code-bg);color:var(--code-ink);padding:18px;overflow:auto;font-family:var(--mono);font-size:13.5px;line-height:1.65}
+  pre .c{color:#8d8674} pre .k{color:var(--accent-soft)}
+  .card .note{padding:14px 18px;color:var(--ink-soft);font-size:14px}
+  .card .note em{color:var(--ink);font-style:normal;font-family:var(--mono);font-size:13px}
 
-  footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-size:14px}
-  footer .row{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;align-items:center}
-  footer a{color:var(--muted)} footer a:hover{color:var(--ink)}
+  footer{border-top:1.5px solid var(--ink);padding:30px 0}
+  footer .row{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;align-items:center;font-family:var(--mono);font-size:13px;color:var(--ink-soft)}
+  footer a{color:var(--ink-soft)} footer a:hover{color:var(--accent)}
 
-  @media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto} }
-  @media(max-width:820px){
-    .hero-grid{grid-template-columns:1fr;gap:28px} .grid3,.steps,.tabs{grid-template-columns:1fr}
-    .nav nav a:not(.gh){display:none} .browser iframe{height:360px}
+  /* motion — load stagger, reduced-motion safe */
+  @media (prefers-reduced-motion:no-preference){
+    .reveal{opacity:0;transform:translateY(14px);animation:up .6s var(--ease) forwards}
+    .reveal.d1{animation-delay:.06s}.reveal.d2{animation-delay:.14s}.reveal.d3{animation-delay:.22s}
+    .reveal.d4{animation-delay:.3s}.reveal.d5{animation-delay:.4s}
+    @keyframes up{to{opacity:1;transform:none}}
+  }
+  @media(max-width:860px){
+    .hero-grid{grid-template-columns:1fr;gap:34px}
+    .cols,.proc,.tabs{grid-template-columns:1fr}
+    .col{border-left:0;border-top:1px solid var(--rule);padding:22px 0 0}.col:first-child{padding-top:4px}
+    .nav nav a:not(.gh){display:none}
+    .figure iframe{height:380px}
   }
 </style>
 </head>
@@ -106,12 +166,13 @@
 
 <header class="nav">
   <div class="wrap row">
-    <span class="brand"><span class="sq" aria-hidden="true"></span> mermaid-slide-deck</span>
+    <span class="brand"><span class="mk" aria-hidden="true"></span> mermaid-slide-deck</span>
     <nav aria-label="Primary">
-      <a href="#demo">Demo</a>
-      <a href="#how">How it works</a>
+      <a href="#why">Why</a>
+      <a href="#how">How</a>
+      <a href="#inside">Inside</a>
       <a href="#install">Install</a>
-      <a class="gh" href="https://github.com/cskwork/mermaid-slide-deck">GitHub</a>
+      <a class="gh" href="https://github.com/cskwork/mermaid-slide-deck">GitHub &#8599;</a>
     </nav>
   </div>
 </header>
@@ -120,77 +181,79 @@
   <section class="hero" style="border-top:0">
     <div class="wrap hero-grid">
       <div>
-        <span class="eyebrow">Claude Code skill + plain HTML template</span>
-        <h1>Explain logic as a <span class="grad">deck</span>,<br>not a wall of text.</h1>
-        <p class="lead">Turn any logic, code path, or architecture into a horizontal, flip-through slide deck — Mermaid diagrams over prose, dark theme, no vertical scroll. One slide = one screen = one message.</p>
-        <div class="cta">
-          <a class="btn btn-primary" href="examples/checkout-validation.html">View live demo &rarr;</a>
-          <a class="btn btn-ghost" href="https://github.com/cskwork/mermaid-slide-deck">GitHub repo</a>
+        <div class="eyebrow label reveal d1">Fig.00 — a Claude Code skill</div>
+        <h1 class="reveal d2">Explain logic<br>as a <em>deck</em>.</h1>
+        <p class="lead reveal d3">Turn any code path, query, or architecture into a horizontal, flip-through slide deck — Mermaid diagrams instead of prose, no vertical scroll. One slide, one screen, one idea.</p>
+        <div class="cta reveal d4">
+          <a class="btn btn-primary" href="examples/checkout-validation.html">View the live deck <span class="arr">&rarr;</span></a>
+          <a class="btn" href="https://github.com/cskwork/mermaid-slide-deck">Source on GitHub</a>
         </div>
-        <div class="chips">
-          <span class="chip"><b>0</b> build steps</span>
-          <span class="chip"><b>1</b> HTML file</span>
-          <span class="chip">Mermaid diagrams</span>
-          <span class="chip">Keyboard · swipe · dots</span>
+        <div class="specrow reveal d5">
+          <div><b>0</b> build steps</div>
+          <div><b>1</b> HTML file</div>
+          <div><b>MIT</b> licensed</div>
         </div>
       </div>
-      <div>
-        <div class="browser">
-          <div class="bar" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="addr">checkout-validation.html</span></div>
+      <div class="reveal d4">
+        <div class="figure">
+          <span class="cap"><b>Fig.01</b> &middot; live</span>
           <iframe src="examples/checkout-validation.html" title="Live example slide deck" loading="lazy"></iframe>
         </div>
-        <p class="preview-note">Live deck above. <a href="examples/checkout-validation.html">Open it fullscreen &#8599;</a> and use &larr; &rarr; to flip.</p>
+        <p class="figcap">Real deck, rendering now. <a href="examples/checkout-validation.html">Open fullscreen &#8599;</a> — flip with &larr; &rarr;, Space, or swipe.</p>
       </div>
     </div>
   </section>
 
   <section id="why">
     <div class="wrap">
-      <h2>Why a deck?</h2>
-      <p class="sectsub">Long prose explanations get skimmed and the logic gets lost. A deck forces the opposite discipline.</p>
-      <div class="grid3">
-        <div class="feat"><div class="ic i-blue">1</div><h3>One message per slide</h3><p>One slide = one screen. If it doesn't fit, you split it — so each idea lands on its own.</p></div>
-        <div class="feat"><div class="ic i-green">2</div><h3>Diagrams are the content</h3><p>Flowcharts, sequence diagrams, and before/after pairs carry the load. Prose shrinks into small WHY / CAUTION / FACTS panels.</p></div>
-        <div class="feat"><div class="ic i-violet">3</div><h3>Flip, don't scroll</h3><p>Arrow keys, Space, on-screen buttons, touch swipe, and dots. No endless vertical scroll.</p></div>
+      <div class="seclabel"><span class="no">§ 01</span><h2>Why a deck</h2><span class="rule"></span></div>
+      <div class="cols">
+        <div class="col"><div class="idx">i.</div><h3>One message per slide</h3><p>One slide equals one screen. If it doesn't fit, you split it — so each idea lands on its own instead of drowning in a scroll.</p></div>
+        <div class="col"><div class="idx">ii.</div><h3>Diagrams are the content</h3><p>Flowcharts, sequence diagrams, and before/after pairs do the work. Prose shrinks into small WHY, CAUTION, and FACTS panels.</p></div>
+        <div class="col"><div class="idx">iii.</div><h3>Flip, don't scroll</h3><p>Arrow keys, Space, on-screen buttons, touch swipe, dots, a progress bar. Horizontal by design — like the logic it shows.</p></div>
       </div>
     </div>
   </section>
 
-  <section id="demo">
+  <section id="frames">
     <div class="wrap">
-      <h2>See it in motion</h2>
-      <p class="sectsub">A generic example — why a checkout flow validates before it calls the payment service. Eight slides: flow, sequence, before/after, evidence, summary.</p>
-      <div class="browser">
-        <div class="bar" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="addr">examples/checkout-validation.html</span></div>
-        <iframe src="examples/checkout-validation.html" title="Live example slide deck, full" loading="lazy" style="height:520px"></iframe>
+      <div class="seclabel"><span class="no">§ 02</span><h2>Eight frames, one file</h2><span class="rule"></span></div>
+      <div class="strip-head"><span class="label">Plate index</span><span class="hint">scroll &rarr;</span></div>
+      <div class="strip" role="list" aria-label="Slide types in the example deck">
+        <div class="plate" role="listitem"><span class="pn">PL.01</span><span class="pt">Title</span><span class="gl"><span class="a"></span><span class="b"></span></span></div>
+        <div class="plate" role="listitem"><span class="pn">PL.02</span><span class="pt">Overview</span><span class="gl"><span class="a"></span><span class="c"></span><span class="b"></span></span></div>
+        <div class="plate" role="listitem"><span class="pn">PL.03</span><span class="pt">Flow</span><span class="gl"><span class="b"></span><span class="a"></span><span class="c"></span></span></div>
+        <div class="plate" role="listitem"><span class="pn">PL.04</span><span class="pt">Sequence</span><span class="gl"><span class="c"></span><span class="a"></span><span class="b"></span></span></div>
+        <div class="plate" role="listitem"><span class="pn">PL.05</span><span class="pt">Key point</span><span class="gl"><span class="a"></span><span class="b"></span></span></div>
+        <div class="plate" role="listitem"><span class="pn">PL.06</span><span class="pt">Before / After</span><span class="gl"><span class="b"></span><span class="b"></span></span></div>
+        <div class="plate" role="listitem"><span class="pn">PL.07</span><span class="pt">Evidence</span><span class="gl"><span class="a"></span><span class="c"></span></span></div>
+        <div class="plate" role="listitem"><span class="pn">PL.08</span><span class="pt">Summary</span><span class="gl"><span class="c"></span><span class="b"></span><span class="a"></span></span></div>
       </div>
-      <p class="preview-note"><a class="btn btn-ghost" href="examples/checkout-validation.html" style="margin-top:10px">Open the demo fullscreen &#8599;</a></p>
     </div>
   </section>
 
   <section id="how">
     <div class="wrap">
-      <h2>How it works</h2>
-      <p class="sectsub">No framework, no build. The whole deck is one self-contained HTML file.</p>
-      <div class="steps">
-        <div class="step"><h3>Copy the template</h3><p>Grab <code>TEMPLATE.html</code> — a dark-theme deck skeleton with eight slide types and the navigation wired in.</p></div>
-        <div class="step"><h3>Fill the slides</h3><p>Replace the <code>{{...}}</code> placeholders, add or remove <code>&lt;section&gt;</code> blocks. The nav counts them automatically.</p></div>
-        <div class="step"><h3>Open it</h3><p>Double-click the file. Mermaid renders, scroll-snap navigation just works. Ship the single file anywhere.</p></div>
+      <div class="seclabel"><span class="no">§ 03</span><h2>How it works</h2><span class="rule"></span></div>
+      <div class="proc">
+        <div class="s"><h3>Copy the template</h3><p>Grab <code>TEMPLATE.html</code> — a deck skeleton with eight slide types and the navigation already wired in.</p></div>
+        <div class="s"><h3>Fill the slides</h3><p>Replace the <code>{{...}}</code> placeholders; add or remove <code>section</code> blocks. The nav counts them for you.</p></div>
+        <div class="s"><h3>Open it</h3><p>Double-click. Mermaid renders, scroll-snap navigation just works. Ship the single file anywhere.</p></div>
       </div>
     </div>
   </section>
 
   <section id="inside">
     <div class="wrap">
-      <h2>What's inside</h2>
-      <p class="sectsub">Use it as a Claude Code skill, or just take the HTML.</p>
+      <div class="seclabel"><span class="no">§ 04</span><h2>What's inside</h2><span class="rule"></span></div>
       <table>
-        <thead><tr><th>File</th><th>Purpose</th></tr></thead>
+        <caption>Parts list</caption>
+        <thead><tr><th style="width:38%">File</th><th>Purpose</th></tr></thead>
         <tbody>
-          <tr><td><code>SKILL.md</code></td><td>Skill router + the slide-decomposition workflow and checklist</td></tr>
-          <tr><td><code>TEMPLATE.html</code></td><td>Self-contained deck skeleton (dark theme, scroll-snap nav, 8 slide types)</td></tr>
-          <tr><td><code>MERMAID-SAFE-SUBSET.md</code></td><td>The Mermaid syntax subset that renders without errors</td></tr>
-          <tr><td><code>examples/checkout-validation.html</code></td><td>A complete, generic example deck</td></tr>
+          <tr><td><span class="fn">SKILL.md</span></td><td class="desc">Skill router plus the slide-decomposition workflow and checklist</td></tr>
+          <tr><td><span class="fn">TEMPLATE.html</span></td><td class="desc">Self-contained deck skeleton — scroll-snap nav, eight slide types</td></tr>
+          <tr><td><span class="fn">MERMAID-SAFE-SUBSET.md</span></td><td class="desc">The Mermaid syntax subset that renders without errors</td></tr>
+          <tr><td><span class="fn">examples/checkout-validation.html</span></td><td class="desc">A complete, generic example deck</td></tr>
         </tbody>
       </table>
     </div>
@@ -198,21 +261,21 @@
 
   <section id="install">
     <div class="wrap">
-      <h2>Install</h2>
-      <p class="sectsub">Two ways to use it.</p>
+      <div class="seclabel"><span class="no">§ 05</span><h2>Install</h2><span class="rule"></span></div>
       <div class="tabs">
-        <div class="panel">
-          <h3><span class="tag">A</span> As a Claude Code skill</h3>
-          <pre><code>git clone https://github.com/cskwork/mermaid-slide-deck.git \
-  ~/.claude/skills/mermaid-slide-deck</code></pre>
-          <p class="muted" style="margin:12px 0 0;font-size:14px">Then ask: <em>"explain this logic as slides / as a deck / with diagrams."</em> Korean triggers work too — <span class="mono">슬라이드로 설명</span>, <span class="mono">다이어그램으로 보여줘</span>.</p>
+        <div class="card">
+          <div class="ch"><span class="tg">A</span><h3>As a Claude Code skill</h3></div>
+          <pre><span class="c"># clone into your skills dir</span>
+git clone https://github.com/cskwork/<span class="k">mermaid-slide-deck</span>.git \
+  ~/.claude/skills/mermaid-slide-deck</pre>
+          <div class="note">Then ask: <em>explain this logic as slides</em>. Korean works too — <em>슬라이드로 설명</em>, <em>다이어그램으로 보여줘</em>.</div>
         </div>
-        <div class="panel">
-          <h3><span class="tag" style="background:var(--blue)">B</span> As a plain HTML template</h3>
-          <pre><code>curl -O https://raw.githubusercontent.com/\
-cskwork/mermaid-slide-deck/main/TEMPLATE.html
-# edit the {{...}} placeholders, then open it</code></pre>
-          <p class="muted" style="margin:12px 0 0;font-size:14px">No Node, no bundler. Works offline except the Mermaid CDN script.</p>
+        <div class="card">
+          <div class="ch"><span class="tg b">B</span><h3>As a plain HTML template</h3></div>
+          <pre><span class="c"># grab the single file</span>
+curl -O https://raw.githubusercontent.com/\
+cskwork/mermaid-slide-deck/main/<span class="k">TEMPLATE.html</span></pre>
+          <div class="note">No Node, no bundler. Works offline except the Mermaid CDN script.</div>
         </div>
       </div>
     </div>
@@ -221,8 +284,8 @@ cskwork/mermaid-slide-deck/main/TEMPLATE.html
 
 <footer>
   <div class="wrap row">
-    <span>MIT licensed · built with <a href="https://mermaid.js.org/">Mermaid</a></span>
-    <span><a href="https://github.com/cskwork/mermaid-slide-deck">GitHub</a> · <a href="examples/checkout-validation.html">Live demo</a> · <a href="https://github.com/cskwork/mermaid-slide-deck/blob/main/TEMPLATE.html">Template</a></span>
+    <span>MIT &middot; built with <a href="https://mermaid.js.org/">Mermaid</a></span>
+    <span><a href="https://github.com/cskwork/mermaid-slide-deck">GitHub</a> &nbsp;/&nbsp; <a href="examples/checkout-validation.html">Live deck</a> &nbsp;/&nbsp; <a href="https://github.com/cskwork/mermaid-slide-deck/blob/main/TEMPLATE.html">Template</a></span>
   </div>
 </footer>
 </body>
