@@ -7,7 +7,12 @@ Mermaid diagrams instead of walls of text.
 It ships as a [Claude Code](https://docs.claude.com/en/docs/claude-code) **Agent Skill**, but the
 `TEMPLATE.html` is a plain HTML file you can also use by hand — no build step, no framework.
 
-![one slide = one screen = one message](https://img.shields.io/badge/one%20slide-one%20message-60a5fa) ![no vertical scroll](https://img.shields.io/badge/scroll-horizontal%20only-34d399) ![license](https://img.shields.io/badge/license-MIT-aebccf)
+[![live demo](https://img.shields.io/badge/live%20demo-cskwork.github.io-60a5fa?logo=github)](https://cskwork.github.io/mermaid-slide-deck/) ![no vertical scroll](https://img.shields.io/badge/scroll-horizontal%20only-34d399) ![license](https://img.shields.io/badge/license-MIT-aebccf)
+
+## Live demo
+
+- **Landing page** → https://cskwork.github.io/mermaid-slide-deck/
+- **Example deck** → https://cskwork.github.io/mermaid-slide-deck/examples/checkout-validation.html — a generic "validate before you charge" walkthrough. Flip with arrow keys, Space, on-screen buttons, or swipe.
 
 ## Why
 
