@@ -138,6 +138,7 @@
   .card .ch h3{font-size:16px;margin:0;font-weight:600}
   pre{margin:0;background:var(--code-bg);color:var(--code-ink);padding:18px;overflow:auto;font-family:var(--mono);font-size:13.5px;line-height:1.65}
   pre .c{color:#8d8674} pre .k{color:var(--accent-soft)}
+  .card pre{white-space:pre-wrap;overflow-wrap:anywhere}
   .card .note{padding:14px 18px;color:var(--ink-soft);font-size:14px}
   .card .note em{color:var(--ink);font-style:normal;font-family:var(--mono);font-size:13px}
 
@@ -169,6 +170,7 @@
     <span class="brand"><span class="mk" aria-hidden="true"></span> mermaid-slide-deck</span>
     <nav aria-label="Primary">
       <a href="#why">Why</a>
+      <a href="#frames">Frames</a>
       <a href="#how">How</a>
       <a href="#inside">Inside</a>
       <a href="#install">Install</a>
@@ -238,7 +240,7 @@
       <div class="proc">
         <div class="s"><h3>Copy the template</h3><p>Grab <code>TEMPLATE.html</code> — a deck skeleton with eight slide types and the navigation already wired in.</p></div>
         <div class="s"><h3>Fill the slides</h3><p>Replace the <code>{{...}}</code> placeholders; add or remove <code>section</code> blocks. The nav counts them for you.</p></div>
-        <div class="s"><h3>Open it</h3><p>Double-click. Mermaid renders, scroll-snap navigation just works. Ship the single file anywhere.</p></div>
+        <div class="s"><h3>Open it</h3><p>Double-click. Mermaid renders and the scroll-snap navigation is already wired in. Ship the single file anywhere.</p></div>
       </div>
     </div>
   </section>
@@ -268,13 +270,12 @@
           <pre><span class="c"># clone into your skills dir</span>
 git clone https://github.com/cskwork/<span class="k">mermaid-slide-deck</span>.git \
   ~/.claude/skills/mermaid-slide-deck</pre>
-          <div class="note">Then ask: <em>explain this logic as slides</em>. Korean works too — <em>슬라이드로 설명</em>, <em>다이어그램으로 보여줘</em>.</div>
+          <div class="note">Then ask: <em>explain this logic as slides</em>. Korean works too — <em lang="ko">슬라이드로 설명</em>, <em lang="ko">다이어그램으로 보여줘</em>.</div>
         </div>
         <div class="card">
           <div class="ch"><span class="tg b">B</span><h3>As a plain HTML template</h3></div>
           <pre><span class="c"># grab the single file</span>
-curl -O https://raw.githubusercontent.com/\
-cskwork/mermaid-slide-deck/main/<span class="k">TEMPLATE.html</span></pre>
+curl -O https://raw.githubusercontent.com/cskwork/mermaid-slide-deck/main/<span class="k">TEMPLATE.html</span></pre>
           <div class="note">No Node, no bundler. Works offline except the Mermaid CDN script.</div>
         </div>
       </div>
