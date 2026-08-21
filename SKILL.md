@@ -11,8 +11,10 @@ No vertical scroll — one slide = one screen = one message. Diagrams lead; pros
 ## Quick start
 
 1. Read the real code/query/flow you are explaining first — verify, don't guess.
-2. Copy [`TEMPLATE.html`](TEMPLATE.html), fill the slides (reuse the CSS/JS skeleton as-is).
-3. Save and open it (`open` / `xdg-open` / `start`). Tell the user the absolute path.
+2. Copy [`TEMPLATE.html`](TEMPLATE.html) to `deck.html`, reuse the CSS/JS skeleton as-is, and fill every
+   `{{...}}` placeholder. Add or remove `<section class="slide">` blocks freely — navigation counts them.
+   Done when `grep -c '{{' deck.html` returns 0.
+3. Open it (`open` / `xdg-open` / `start`). Tell the user the absolute path.
 
 ## Slide decomposition (default order — adapt to the subject)
 
@@ -29,7 +31,7 @@ No vertical scroll — one slide = one screen = one message. Diagrams lead; pros
 
 - [ ] One message per slide. Content must fit one screen (100vh) — if it overflows, split the slide.
 - [ ] Diagrams are the content. Move long prose into coloured panels (WHY green / CAUTION amber / FACTS grey).
-- [ ] Every Mermaid block follows the safe subset — no pipe `|`, no single quotes, no HTML entities (`&gt;`), quote multi-char labels. See [`MERMAID-SAFE-SUBSET.md`](MERMAID-SAFE-SUBSET.md).
+- [ ] Every Mermaid block follows the safe subset — no pipe `|`, no single quotes, no HTML entities (`&gt;`), quote multi-char labels. Read [`MERMAID-SAFE-SUBSET.md`](MERMAID-SAFE-SUBSET.md) before writing the first diagram.
 - [ ] After writing, grep the mermaid blocks for risky patterns (snippet below) — all counts 0.
 - [ ] Navigation: prev/next buttons + keyboard (Arrow / Space / Home / End) + touch swipe + dots + progress bar.
 - [ ] Accessibility: `role` / `aria-roledescription="slide"` / skip link / `:focus-visible` / `prefers-reduced-motion`. Pair colour with text (never colour alone).
@@ -39,7 +41,7 @@ No vertical scroll — one slide = one screen = one message. Diagrams lead; pros
 ## Mermaid safety check (run after writing)
 
 ```bash
-F=<generated html>
+F=deck.html
 awk '/class="mermaid"/{f=1} f{print} /<\/div>/{if(f)f=0}' "$F" > /tmp/mm.txt
 grep -c '|' /tmp/mm.txt; grep -cE '&gt;|&lt;|&amp;' /tmp/mm.txt; grep -c "'" /tmp/mm.txt   # all 0
 ```
@@ -55,4 +57,3 @@ ask the user to confirm the diagrams render in the browser.
   `html,body{overflow:hidden}` removes vertical scroll.
 - Current slide is tracked with `IntersectionObserver` (keeps counter/dots/progress synced on swipe).
 - Type sizes use `clamp()`. To make everything bigger, raise the `:root` token values.
-- Full skeleton, theme, and JS live in `TEMPLATE.html`.
