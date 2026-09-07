@@ -1,6 +1,6 @@
 ---
 name: mermaid-slide-deck
-description: Turn logic, a code path, an architecture, or a verification result into a horizontal slide deck (dark-theme PPT-style, Mermaid diagrams, coloured panels) as a single self-contained HTML file. Use when the user asks to explain how something works visually, as slides, as a deck, or with diagrams/flowcharts. Korean triggers — "시각적으로 로직/코드 만들어줘", "슬라이드로 설명", "비주얼하게 설명", "PPT 형식으로", "다이어그램으로 설명", "플로우로 보여줘".
+description: Turn logic, a code path, an architecture, or a verification result into a horizontal slide deck (dark-theme PPT-style, Mermaid diagrams, coloured panels) as a single HTML file with CDN-rendered Mermaid diagrams. Use when the user wants a browser-based slide deck explaining logic or architecture; a single inline diagram or a .pptx request does not imply this HTML format.
 ---
 
 # Mermaid Slide Deck
@@ -46,12 +46,11 @@ awk '/class="mermaid"/{f=1} f{print} /<\/div>/{if(f)f=0}' "$F" > /tmp/mm.txt
 grep -c '|' /tmp/mm.txt; grep -cE '&gt;|&lt;|&amp;' /tmp/mm.txt; grep -c "'" /tmp/mm.txt   # all 0
 ```
 
-If `mmdc` is available, also render-check. Otherwise rely on the safe subset + the grep above, and
-ask the user to confirm the diagrams render in the browser.
+Render-check with `mmdc` or an available browser. Pattern checks alone do not prove diagrams render. If neither is available, report render verification as incomplete without claiming visual success.
 
 ## Technical notes
 
-- Single self-contained HTML. Mermaid loads from CDN (`mermaid@10` ESM); if blocked, the
+- Single HTML file with a runtime network dependency. Mermaid loads from CDN (`mermaid@10` ESM); if blocked, the
   `<figcaption>` still conveys each diagram's meaning.
 - Horizontal deck: `display:flex` + `scroll-snap-type:x mandatory`, slides `flex:0 0 100vw; height:100vh`.
   `html,body{overflow:hidden}` removes vertical scroll.
